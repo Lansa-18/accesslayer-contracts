@@ -115,6 +115,11 @@ pub mod fee {
         Some((creator_amount, protocol_amount))
     }
 
+    /// Performs checked integer multiplication for quote math helpers.
+    pub fn checked_mul_i128(a: i128, b: i128) -> Option<i128> {
+        a.checked_mul(b)
+    }
+
     /// Performs checked integer division for quote math helpers.
     pub fn checked_div_i128(dividend: i128, divisor: i128) -> Option<i128> {
         if divisor == 0 {
@@ -1034,6 +1039,17 @@ mod tests {
             let (creator, protocol) = fee::compute_fee_split(total, 9000, 1000);
             assert_eq!(creator + protocol, total, "total={}", total);
         }
+    }
+
+    #[test]
+    fn test_checked_mul_i128_success() {
+        assert_eq!(fee::checked_mul_i128(100, 10), Some(1000));
+    }
+
+    #[test]
+    fn test_checked_mul_i128_rejects_overflow() {
+        assert_eq!(fee::checked_mul_i128(i128::MAX, 2), None);
+        assert_eq!(fee::checked_mul_i128(i128::MIN, 2), None);
     }
 
     #[test]
