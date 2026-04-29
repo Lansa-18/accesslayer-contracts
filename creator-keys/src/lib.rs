@@ -1135,6 +1135,58 @@ mod tests {
         // Multiplication overflows before division
         assert_eq!(fee::apply_percentage_fee(i128::MAX, 2), None);
     }
+
+    #[test]
+    fn test_assert_valid_fee_bps() {
+        // Valid scenarios
+        assert_eq!(fee::assert_valid_fee_bps(10000, 0), Ok(()));
+        assert_eq!(fee::assert_valid_fee_bps(5000, 5000), Ok(()));
+        assert_eq!(fee::assert_valid_fee_bps(9000, 1000), Ok(()));
+
+        // Invalid Sum
+        assert_eq!(
+            fee::assert_valid_fee_bps(9000, 2000),
+            Err(super::ContractError::InvalidFeeConfig)
+        );
+        assert_eq!(
+            fee::assert_valid_fee_bps(0, 0),
+            Err(super::ContractError::InvalidFeeConfig)
+        );
+
+        // Protocol Cap Exceeded (PROTOCOL_BPS_MAX = 5000)
+        assert_eq!(
+            fee::assert_valid_fee_bps(4999, 5001),
+            Err(super::ContractError::ProtocolFeeExceedsCap)
+        );
+        assert_eq!(
+            fee::assert_valid_fee_bps(0, 10000),
+            Err(super::ContractError::ProtocolFeeExceedsCap)
+        );
+
+        // Overflow
+        assert_eq!(
+            fee::assert_valid_fee_bps(u32::MAX, 1),
+            Err(super::ContractError::InvalidFeeConfig)
+        );
+    }
+
+    #[test]
+    fn test_validate_fee_bps() {
+        // Valid
+        assert!(fee::validate_fee_bps(10000, 0));
+        assert!(fee::validate_fee_bps(5000, 5000));
+        assert!(fee::validate_fee_bps(9000, 1000));
+
+        // Invalid Sum
+        assert!(!fee::validate_fee_bps(9000, 2000));
+        assert!(!fee::validate_fee_bps(0, 0));
+
+        // Protocol Cap Exceeded
+        assert!(!fee::validate_fee_bps(4999, 5001));
+
+        // Overflow
+        assert!(!fee::validate_fee_bps(u32::MAX, 1));
+    }
 }
 
 #[cfg(test)]
