@@ -112,3 +112,21 @@ fn test_sell_full_exit_then_rebuy_updates_state() {
     assert_eq!(client.get_key_balance(&creator, &trader), 1);
     assert_eq!(client.get_creator_holder_count(&creator), 1);
 }
+
+#[test]
+fn test_holder_count_returns_to_zero_after_last_holder_exit_and_rebuy() {
+    let env = test_env_with_auths();
+    set_test_timestamp(&env, DEFAULT_TEST_TIMESTAMP);
+    let (client, creator) = setup(&env);
+    let trader = Address::generate(&env);
+
+    client.buy_key(&creator, &trader, &100_i128);
+    assert_eq!(client.get_creator_holder_count(&creator), 1);
+
+    client.sell_key(&creator, &trader);
+    assert_eq!(client.get_creator_holder_count(&creator), 0);
+
+    let supply_after_rebuy = client.buy_key(&creator, &trader, &100_i128);
+    assert_eq!(supply_after_rebuy, 1);
+    assert_eq!(client.get_creator_holder_count(&creator), 1);
+}
