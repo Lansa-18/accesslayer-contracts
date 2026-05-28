@@ -130,6 +130,40 @@ pub fn compute_expected_buy_price(_supply: u32, base_price: i128) -> i128 {
     base_price
 }
 
+/// Snapshot of observable contract state for a (creator, holder) pair.
+///
+/// Capture before and after a read-only call with [`capture_snapshot`], then call
+/// [`assert_unchanged`] to confirm no storage mutation occurred.
+#[derive(Debug, PartialEq)]
+pub struct ContractStateSnapshot {
+    pub supply: u32,
+    pub holder_count: u32,
+    pub key_balance: u32,
+}
+
+/// Capture a [`ContractStateSnapshot`] for the given creator and holder.
+pub fn capture_snapshot(
+    client: &CreatorKeysContractClient<'_>,
+    creator: &Address,
+    holder: &Address,
+) -> ContractStateSnapshot {
+    ContractStateSnapshot {
+        supply: client.get_total_key_supply(creator),
+        holder_count: client.get_creator_holder_count(creator),
+        key_balance: client.get_key_balance(creator, holder),
+    }
+}
+
+impl ContractStateSnapshot {
+    /// Asserts that `self` and `other` are identical, failing with a descriptive message if not.
+    pub fn assert_unchanged(&self, after: &ContractStateSnapshot) {
+        assert_eq!(
+            self, after,
+            "contract state changed during a read-only call: before={self:?}, after={after:?}"
+        );
+    }
+}
+
 /// Computes the expected (gross) sell price for a given supply value.
 ///
 /// Current bonding curve formula:

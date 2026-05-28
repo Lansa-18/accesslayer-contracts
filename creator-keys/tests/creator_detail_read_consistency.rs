@@ -131,41 +131,19 @@ fn test_creator_details_no_storage_writes_during_reads() {
     let creator = soroban_sdk::Address::generate(&env);
     let handle = String::from_str(&env, "charlie");
 
-    // Register creator
     client.register_creator(&creator, &handle);
 
-    // Capture storage state before reads
-    // Note: In Soroban SDK, we can't directly inspect storage writes, but we can
-    // verify that repeated reads don't change the returned values, which would
-    // indicate no state mutation is occurring.
+    // Use a sentinel holder address — no keys held, so balance stays 0.
+    let sentinel = soroban_sdk::Address::generate(&env);
+    let before = contract_test_env::capture_snapshot(&client, &creator, &sentinel);
 
-    // Perform multiple reads
-    let read1 = client.get_creator_details(&creator);
-    let read2 = client.get_creator_details(&creator);
-    let read3 = client.get_creator_details(&creator);
-    let read4 = client.get_creator_details(&creator);
+    client.get_creator_details(&creator);
+    client.get_creator_details(&creator);
+    client.get_creator_details(&creator);
+    client.get_creator_details(&creator);
 
-    // If reads were triggering writes, we might see inconsistent values or
-    // side effects. The fact that all reads return identical values confirms
-    // no storage writes are occurring.
-    assert_eq!(read1.is_registered, read2.is_registered);
-    assert_eq!(read2.is_registered, read3.is_registered);
-    assert_eq!(read3.is_registered, read4.is_registered);
-
-    assert_eq!(read1.supply, read2.supply);
-    assert_eq!(read2.supply, read3.supply);
-    assert_eq!(read3.supply, read4.supply);
-
-    // Verify the method is truly read-only by checking that the state
-    // remains unchanged after multiple calls
-    assert_eq!(
-        read1.supply, 0,
-        "supply should remain 0 (no writes during reads)"
-    );
-    assert_eq!(
-        read4.supply, 0,
-        "supply should still be 0 after multiple reads"
-    );
+    let after = contract_test_env::capture_snapshot(&client, &creator, &sentinel);
+    before.assert_unchanged(&after);
 }
 
 #[test]

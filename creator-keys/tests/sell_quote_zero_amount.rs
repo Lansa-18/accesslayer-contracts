@@ -99,11 +99,9 @@ fn test_sell_quote_zero_amount_no_state_modification() {
     let creator = register_test_creator(&env, &client, "charlie");
     client.buy_key(&creator, &holder, &100);
 
-    let supply_before = client.get_creator_supply(&creator);
-    let balance_before = client.get_key_balance(&creator, &holder);
-
-    // Zero the price and call sell quote multiple times
+    // Zero the price and capture state before the read-only calls.
     set_stored_key_price(&env, &contract_id, 0);
+    let before = contract_test_env::capture_snapshot(&client, &creator, &holder);
 
     for _ in 0..5 {
         let quote = client.get_sell_quote(&creator, &holder);
@@ -111,15 +109,6 @@ fn test_sell_quote_zero_amount_no_state_modification() {
         assert_eq!(quote.total_amount, 0);
     }
 
-    // State must be unchanged after read-only zero quote calls
-    assert_eq!(
-        client.get_creator_supply(&creator),
-        supply_before,
-        "creator supply must not change after zero sell quote calls"
-    );
-    assert_eq!(
-        client.get_key_balance(&creator, &holder),
-        balance_before,
-        "holder balance must not change after zero sell quote calls"
-    );
+    let after = contract_test_env::capture_snapshot(&client, &creator, &holder);
+    before.assert_unchanged(&after);
 }
