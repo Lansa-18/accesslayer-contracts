@@ -5,7 +5,6 @@ mod contract_test_env;
 use contract_test_env::{
     register_creator_keys, register_test_creator, set_pricing_and_fees, test_env_with_auths,
 };
-use creator_keys::QuoteResponse;
 use soroban_sdk::Vec;
 
 #[test]
@@ -25,15 +24,11 @@ fn test_buy_quote_is_stable_across_multiple_calls() {
     let supply_before = client.get_creator_supply(&creator);
 
     // Capture initial quote
-    let first_quote = client
-        .get_buy_quote(&creator)
-        .expect("first quote should succeed");
+    let first_quote = client.get_buy_quote(&creator);
 
     // Perform multiple consecutive calls and verify they match the first result
     for i in 0..5 {
-        let subsequent_quote = client
-            .get_buy_quote(&creator)
-            .expect("subsequent quote should succeed");
+        let subsequent_quote = client.get_buy_quote(&creator);
 
         assert_eq!(
             first_quote, subsequent_quote,
@@ -70,7 +65,7 @@ fn test_buy_quote_stability_with_different_fee_configs() {
 
         let mut quotes = Vec::new(&env);
         for _ in 0..3 {
-            quotes.push_back(client.get_buy_quote(&creator).unwrap());
+            quotes.push_back(client.get_buy_quote(&creator));
         }
 
         let q1 = quotes.get(0).unwrap();

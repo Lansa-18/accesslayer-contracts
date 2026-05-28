@@ -4,7 +4,10 @@ mod contract_test_env;
 
 use contract_test_env::{register_creator_keys, test_env_with_auths};
 use creator_keys::events;
-use soroban_sdk::{testutils::Events, Address, IntoVal, String};
+use soroban_sdk::{
+    testutils::{Address as _, Events},
+    Address, IntoVal, String,
+};
 
 #[test]
 fn test_register_creator_event_field_values_match_fixtures() {
@@ -42,8 +45,13 @@ fn test_register_creator_event_field_values_match_fixtures() {
 
     assert_eq!(
         payload.handle, handle,
-        "Registration event 'handle' field mismatch. Expected: {}, Got: {}",
-        handle_str, payload.handle
+        "Registration event 'handle' field mismatch"
+    );
+    // Verify the handle matches the original string value
+    assert_eq!(
+        payload.handle,
+        String::from_str(&env, handle_str),
+        "Registration event 'handle' does not match fixture string"
     );
 
     assert_eq!(
