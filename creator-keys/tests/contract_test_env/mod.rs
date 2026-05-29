@@ -188,6 +188,14 @@ pub fn compute_expected_protocol_fee(price: i128, protocol_bps: u32) -> i128 {
     (price * protocol_bps as i128) / 10_000
 }
 
+/// Computes the expected creator fee from a given price and fee split.
+///
+/// Mirrors [`compute_expected_protocol_fee`] using the shared fee split helper
+/// so buy fee-recipient balance assertions stay aligned with quote math.
+pub fn compute_expected_creator_fee(price: i128, creator_bps: u32, protocol_bps: u32) -> i128 {
+    creator_keys::fee::compute_fee_split(price, creator_bps, protocol_bps).0
+}
+
 /// Represents a trade operation (buy or sell) in a sequence.
 #[derive(Debug, Clone, Copy)]
 pub enum TradeOperation {
