@@ -75,9 +75,9 @@ fn test_buy_quote_zero_supply_well_formed() {
     // Verify well-formed quote structure
     assert_eq!(quote.price, key_price, "price should equal base price");
     assert_eq!(
-        quote.price,
-        quote.creator_fee + quote.protocol_fee + quote.total_amount,
-        "price should equal sum of all components"
+        quote.total_amount,
+        quote.price + quote.creator_fee + quote.protocol_fee,
+        "total amount should equal price plus all fees"
     );
 
     // With 80/20 split on 1000: creator = 800, protocol = 200
