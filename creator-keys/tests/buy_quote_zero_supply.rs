@@ -55,10 +55,7 @@ fn test_buy_quote_zero_supply_various_prices() {
             quote.price, *price,
             "first-key price should equal configured base price for supply=0"
         );
-        assert_ne!(
-            quote.price, 0,
-            "first-key price should be non-zero"
-        );
+        assert_ne!(quote.price, 0, "first-key price should be non-zero");
     }
 }
 
@@ -110,8 +107,20 @@ fn test_buy_quote_zero_supply_consistent_across_calls() {
     let quote2 = client.get_buy_quote(&creator);
     let quote3 = client.get_buy_quote(&creator);
 
-    assert_eq!(quote1.price, quote2.price, "quote price should be consistent");
-    assert_eq!(quote2.price, quote3.price, "quote price should be consistent");
-    assert_eq!(quote1.creator_fee, quote2.creator_fee, "creator fee should be consistent");
-    assert_eq!(quote1.protocol_fee, quote2.protocol_fee, "protocol fee should be consistent");
+    assert_eq!(
+        quote1.price, quote2.price,
+        "quote price should be consistent"
+    );
+    assert_eq!(
+        quote2.price, quote3.price,
+        "quote price should be consistent"
+    );
+    assert_eq!(
+        quote1.creator_fee, quote2.creator_fee,
+        "creator fee should be consistent"
+    );
+    assert_eq!(
+        quote1.protocol_fee, quote2.protocol_fee,
+        "protocol fee should be consistent"
+    );
 }
