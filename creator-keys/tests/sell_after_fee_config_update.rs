@@ -36,7 +36,7 @@ fn test_sell_execution_applies_updated_protocol_fee() {
     // Update fee config before executing sell
     client.set_fee_config(&admin, &8000, &2000); // updated: 80/20 split
 
-    let supply = client.sell_key(&creator, &holder, &1);
+    let supply = client.sell_key(&creator, &holder);
     assert_eq!(supply, 0, "supply should decrement to 0 after sell");
 
     // Holder balance should be zero after selling
@@ -90,7 +90,7 @@ fn test_sell_execution_fee_matches_quote_after_fee_config_update() {
     let quote = client.get_sell_quote(&creator, &holder);
 
     // Execute the sell
-    let supply = client.sell_key(&creator, &holder, &1);
+    let supply = client.sell_key(&creator, &holder);
     assert_eq!(supply, 0, "supply should be 0 after sell");
     assert_eq!(
         client.get_key_balance(&creator, &holder),
