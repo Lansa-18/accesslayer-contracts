@@ -719,10 +719,11 @@ impl CreatorKeysContract {
         env.storage().persistent().set(&balance_key, &new_balance);
 
         if let Some(config) = read_protocol_fee_config(&env) {
-            let (creator_fee, _) =
+            let (creator_fee, protocol_fee) =
                 fee::checked_compute_fee_split(price, config.creator_bps, config.protocol_bps)
                     .ok_or(ContractError::Overflow)?;
             credit_creator_fee_recipient_balance(&env, &creator, creator_fee)?;
+            credit_protocol_fee_recipient_balance(&env, protocol_fee)?;
         }
 
         env.events().publish(
