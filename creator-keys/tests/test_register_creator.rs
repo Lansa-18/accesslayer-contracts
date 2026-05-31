@@ -10,10 +10,8 @@ fn test_register_creator_minimum_handle_length_success() {
     let (client, _) = register_creator_keys(&env);
     let creator = Address::generate(&env);
 
-    // Create a handle of exactly HANDLE_LEN_MIN characters
-    let handle_bytes = [b'a'; HANDLE_LEN_MIN as usize];
-    let handle_str = core::str::from_utf8(&handle_bytes).unwrap();
-    let handle = String::from_str(&env, handle_str);
+    let min_handle = "a".repeat(HANDLE_LEN_MIN as usize);
+    let handle = String::from_str(&env, &min_handle);
 
     let result = client.try_register_creator(&creator, &handle);
 
@@ -24,6 +22,7 @@ fn test_register_creator_minimum_handle_length_success() {
     assert!(client.is_creator_registered(&creator));
     let profile = client.get_creator(&creator);
     assert_eq!(profile.handle, handle);
+    assert_eq!(profile.creator, creator);
 }
 
 #[test]
@@ -32,10 +31,8 @@ fn test_register_creator_below_minimum_handle_length_fails() {
     let (client, _) = register_creator_keys(&env);
     let creator = Address::generate(&env);
 
-    // Create a handle one character below HANDLE_LEN_MIN
-    let handle_bytes = [b'a'; (HANDLE_LEN_MIN - 1) as usize];
-    let handle_str = core::str::from_utf8(&handle_bytes).unwrap();
-    let handle = String::from_str(&env, handle_str);
+    let short_handle = "a".repeat((HANDLE_LEN_MIN - 1) as usize);
+    let handle = String::from_str(&env, &short_handle);
 
     let result = client.try_register_creator(&creator, &handle);
 
